@@ -6,7 +6,7 @@ class House:
         return super().__new__(cls)
 
     def __del__(self):
-        return f'{self.name} снесён, но он останется в истории'
+        print(f'{self.name} снесён, но он останется в истории')
 
     def __init__(self, name, numbers_of_floors):
         self.name = name
