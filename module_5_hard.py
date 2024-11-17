@@ -1,7 +1,10 @@
 import time
+from shutil import which
+from urllib.parse import uses_query
+
 
 class User:
-    def __init__(self, nickname, password, age):
+    def __init__(self, nickname, password, age: int):
         self.nickname = nickname
         self.password = password
         self.age = age
@@ -20,6 +23,12 @@ class Video:
     def __repr__(self):
         return self.title
 
+    def __contains__(self, item):
+        return item in self.title
+
+    def __eq__(self, other):
+        return self.title == other.title
+
 
 class UrTube:
     def __init__(self):
@@ -34,10 +43,9 @@ class UrTube:
 
     def register(self, nickname, password, age):
         for user in self.users:
-            if user[nickname] == nickname:
-                print(f'Пользователь {nickname} уже существует')
-            else:
-                self.users.append(user)
+            if user.nickname == nickname:
+                return f'Пользователь {nickname} уже существует'
+        self.users.append(User(nickname, password, age))
 
     def log_out(self):
         self.current_user = None
@@ -57,22 +65,21 @@ class UrTube:
 
     def watch_video(self, name_film):
         film = self.get_videos(name_film)
+
+        if not self.current_user:
+            print('Войдите в аккаунт, чтобы смотреть видео')
+
+        for video in self.videos:
+            if video.adult_mode:
+                print('Вам нет 18 лет, пожалуйста, покиньте страницу')
+
         if len(film) == 0:
             print('Видео не найдено')
         else:
             for i in range(film[0].duration):
                 time.sleep(1)
-                print(f'Прошло {i + 1} секунд из {film[0].duration}')
+                print(f'{i + 1}', end=' ')
             print('Видео закончилось')
-
-
-    def __contains__(self, item):
-        return
-
-    def __eq__(self, other):
-        return
-
-
 
 
 ur = UrTube()
@@ -99,3 +106,13 @@ print(ur.current_user)
 
 # Попытка воспроизведения несуществующего видео
 ur.watch_video('Лучший язык программирования 2024 года!')
+
+
+
+# ['Лучший язык программирования 2024 года']
+# ['Лучший язык программирования 2024 года', 'Для чего девушкам парень программист?']
+# Войдите в аккаунт, чтобы смотреть видео
+# Вам нет 18 лет, пожалуйста покиньте страницу
+# 1 2 3 4 5 6 7 8 9 10 Конец видео
+# Пользователь vasya_pupkin уже существует
+# urban_pythonist
