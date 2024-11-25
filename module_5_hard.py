@@ -1,13 +1,14 @@
 import time
-from shutil import which
-from urllib.parse import uses_query
 
 
 class User:
     def __init__(self, nickname, password, age: int):
         self.nickname = nickname
-        self.password = password
+        self.password = hash(password)
         self.age = age
+
+    def __str__(self):
+        return self.nickname
 
 
 class Video:
@@ -17,35 +18,27 @@ class Video:
         self.time_now = 0
         self.adult_mode = adult_mode
 
-    def __str__(self):
-        return self.title
-
-    def __repr__(self):
-        return self.title
-
-    def __contains__(self, item):
-        return item in self.title
-
-    def __eq__(self, other):
-        return self.title == other.title
-
 
 class UrTube:
     def __init__(self):
         self.users = []
         self.videos = []
-        self.current_user = []
+        self.current_user = None
 
-    def long_in(self, nickname, password):
+    def log_in(self, nickname, password):
         for user in self.users:
-            if user.nickname == nickname and hash(user.password) == hash(password):
+            if nickname == user.nickname and password == user.password:
                 self.current_user = user
 
     def register(self, nickname, password, age):
         for user in self.users:
             if user.nickname == nickname:
-                return f'Пользователь {nickname} уже существует'
-        self.users.append(User(nickname, password, age))
+                print(f"Пользователь {nickname} уже существует")
+                return
+
+        new_user = User(nickname, password, age)
+        self.users.append(new_user)
+        self.current_user = new_user
 
     def log_out(self):
         self.current_user = None
@@ -56,11 +49,10 @@ class UrTube:
                 self.videos.append(video)
 
     def get_videos(self, word):
-        search_word = word.lower()
         found_videos = []
         for video in self.videos:
-            if search_word in video.title.lower():
-                found_videos.append(video)
+            if word.lower() in video.title.lower():
+                found_videos.append(video.title)
         return found_videos
 
     def watch_video(self, name_film):
@@ -68,18 +60,20 @@ class UrTube:
 
         if not self.current_user:
             print('Войдите в аккаунт, чтобы смотреть видео')
+            return
 
         for video in self.videos:
-            if video.adult_mode:
-                print('Вам нет 18 лет, пожалуйста, покиньте страницу')
-
-        if len(film) == 0:
-            print('Видео не найдено')
-        else:
-            for i in range(film[0].duration):
-                time.sleep(1)
-                print(f'{i + 1}', end=' ')
-            print('Видео закончилось')
+            if video.title == name_film:
+                if video.adult_mode and self.current_user.age < 18:
+                    print('Вам нет 18 лет, пожалуйста, покиньте страницу')
+                    return
+                if len(film) == 0:
+                    print('Видео не найдено')
+                else:
+                    for i in range(0, 10):
+                        print(f'{i + 1}', end=' ')
+                        time.sleep(1)
+                    print('Конец видео')
 
 
 ur = UrTube()
@@ -106,13 +100,3 @@ print(ur.current_user)
 
 # Попытка воспроизведения несуществующего видео
 ur.watch_video('Лучший язык программирования 2024 года!')
-
-
-
-# ['Лучший язык программирования 2024 года']
-# ['Лучший язык программирования 2024 года', 'Для чего девушкам парень программист?']
-# Войдите в аккаунт, чтобы смотреть видео
-# Вам нет 18 лет, пожалуйста покиньте страницу
-# 1 2 3 4 5 6 7 8 9 10 Конец видео
-# Пользователь vasya_pupkin уже существует
-# urban_pythonist
